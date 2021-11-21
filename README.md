@@ -1,10 +1,12 @@
+[中文版入口](README_cn.md)
+
 # ThreadPool
 
-这是一个纯粹的、高性能的、不会自发性死锁的线程池，拿到项目里就能使用。  
+This is a pure, high-performance thread pool with no spontaneous deadlocks that you can use in your project.
 
-## 使用方法
+## Method of use
 
-- ### 基本用法 **ThreadPool::run**
+- ### Basic usage: **ThreadPool::run**
   ```c_cpp
     auto asyncTask = [] {
         std::cout << "This is an async task!" << std::endl;
@@ -13,21 +15,21 @@
     future.wait();
   ```
   
-  线程池是以单例形式存在的，内部初始化了**cpu+1**个线程进行工作。当然，这个数量是可以控制的：  
-  ```batchfile
+  The thread pool is a singleton that internally initializes ** CPU +1** threads to work on. Of course, this amount can be controlled:  
+  ```c_cpp
     auto pool = Fate::ThreadPool::instance(20);
   ```
   
-  这个方法必须在使用任何线程池的方法之前进行调用，因为线程池只会创建一次，返回值就是线程池的唯一实例，参数就是你想创建的线程 数量。  
+  This method must be called before using any of the thread pool methods, because the thread pool is created only once, and the return value is a unique instance of the thread pool, and the argument is the number of threads you want to create.
   
-  **run**方法以及后面介绍到的任何添加异步任务的方法，可以接受任何形式的函数定义。**C函数、函数引用、函数指针、函数对象，包括lambda表达式、std::function对象、std::bind表达式对象、自定义函子等。**
+  The **run** method, and any method that adds asynchronous tasks as described below, can accept any form of function definition. **C functions, function references, function Pointers, function objects, including lambda expressions, std::function objects, std::bind expression objects, custom functors, and more. **
   
-   所以，我们仅仅需要关注异步任务本身逻辑即可。  
+  Therefore, we only need to focus on the asynchronous task logic itself.
   
-  **run**方法以及后面介绍到的任何添加异步任务的方法，返回值都是 **std::future\<T\>** 类型，他是c++用于获取异步任务结果的类型，具体使用方法请查看c++标准文档。
+  The **run** method, and any subsequent methods that add asynchronous tasks, return a **std::future\<T\>** , which is the type c++ uses to retrieve the result of an asynchronous task. See the c++ standard documentation for details.
   
-  如果对结果不关心，就没必要接收返回结果了，程序会继续往下运行，而异步任务在另外的线程进行处理。如果想要等待任务结束或者获取到任务返回结果，请使用 **future.wait()** 或者 **future.get()** 方法。当然，这会阻塞当前线程。  
-- ### 高阶函数 **Concurrent::map**
+  If you don't care about the result, there is no need to receive the return result, and the program will continue to run while the asynchronous task is processed in another thread. If you want to wait for the task to finish or get the result of the task, use either the **future.wait()** or the **future.get()** methods. Of course, this blocks the current thread.  
+- ### Higher-order functions: **Concurrent::map**
   ```c_cpp
     std::vector<int> num = { 1, 2, 3, 4, 5, 6 };
     auto mapFunc = [](int& element) {
@@ -37,10 +39,10 @@
     future.wait();  
   ```
   
-  我假设你已经熟悉Map/Reduce编程范式，这里只是并发使用。 **Concurrent::map** 方法可以接受一个容器对象以及一个异步任务，容器中每个元素都会并发的进行异步任务处理，处理结果会体现到容器本身。
+  I'm assuming you're already familiar with the Map/Reduce programming paradigm, which is just concurrent use. The **Concurrent::map** method can accept a container object and an asynchronous task, and each element in the container concurrently performs asynchronous task processing, the results of which are reflected in the container itself.
   
-  换句话说，该方法会影响原容器本身存储元素，前置要求就是异步任务必须以引用的方式接受参数。上述示例的结果就是容器 **num** 的存储元素变为 **11/12/13/14/15/16** 。  
-- ### 高阶函数 **Concurrent::mapped**
+  In other words, this method affects the original container itself to store elements, with the prerequisite that the asynchronous task must accept parameters by reference. The result of the example above is that the storage element of the container **num** becomes **11/12/13/14/15/16**  
+- ### Higher-order functions: **Concurrent::mapped**
   ```c_cpp
     std::vector<int> num = { 1, 2, 3, 4, 5, 6 };
     auto mapFunc = [](int element) {
@@ -51,10 +53,10 @@
     auto ret = future.get();
   ```
   
-  **Concurrent::mapped** 方法和 **Concurrent::map** 方法的唯一区别在于 **Concurrent::mapped** 不会影响原有容器，而是返回一个新的容器，该容器和原有容器类型相同，存储的却是异步任务处理结果。
+  The only difference between the **Concurrent:: Mapped ** methods and the **Concurrent::map** methods is that the **Concurrent::mapped** does not affect the original container, but returns a new container of the same type, It stores the results of asynchronous task processing.
   
-  当然，如果异步任务使用引用接受参数，还是可以影响到原有容器的。从这一点看，**Concurrent::mapped** 方法比 **Concurrent::map** 方法多做了一步，就是把异步任务处理结果组成容器返回。
-- ### 高阶函数 **Concurrent::mappedReduced**
+  Of course, asynchronous tasks can still affect the original container if they accept parameters using references. From this point of view, the **Concurrent:: Mapped** method goes one step further than the **Concurrent::map** method by returning the asynchronous task processing results as containers
+- ### Higher-order functions: **Concurrent::mappedReduced**
   ```c_cpp
     std::vector<int> num = { 1, 2, 3, 4, 5, 6 };
       auto mapFunc = [](int& element) {
@@ -67,31 +69,32 @@
       auto ret = future.get();
   ```
   
-  该方法就是 **Map/Reduce** 范式的全貌了，对于某个容器，先由 **map** 方法对容器中每一个元素进行并发处理，然后将处理结果有次序的交给 **reduce** 方法进行累加处理。其中， **reduce** 方法接受两个参数，第一个参数是累加计算结果 **reduceRet** ，可以进行初始化，第二个参数是容器中元素经过异步任务处理后的结果 **mapRet** 。
+  This method is the full picture of the **Map/Reduce** paradigm. For a container, the **Map** method concurrently processes every element in the container, and then the results are handed over to the **Reduce** method in an orderly manner for cumulative processing. Wherein, the **Reduce** method accepts two parameters, the first parameter is the cumulative calculation result **reduceRet**, which can be initialized, and the second parameter is the result of the elements in the container after asynchronous task processing **mapRet**.
   
-  **Concurrent::mappedReduced** 方法接受至少三个参数，分别是容器、Map异步任务、Reduce计算任务，再多的参数用于初始化累加计算结果 **reduceRet**。上述示例就是用 **19** 初始化 **reduceRet** ，所以，在处理第一个 **mapRet** 之前， **reduceRet** 是有值的，就是 **19** 。
+  **Concurrent::mappedReduced** method takes at least three parameters, are asynchronous task containers, Map, Reduce computing tasks, and no amount of parameters is used to initialize the accumulative calculation results **reduceRet**. The above example is to initialize the **reduceRet** with **19**, so before processing the first **mapRet**, the **reduceRet** has a value, that is **19**.
 
-## 解决痛点
+## To solve the pain points
 
-- ### 线程池的自发性死锁问题
+- ### Spontaneous deadlocks in thread pools
   
-  一开始，我没有注意到线程池的自发性死锁问题，也没打算开源做个线程池，就打算简单封装个线程池自己使用。原始的线程池封装原理比较简单，创建 **cpu+1** 个线程进行休眠，将异步任务添加到任务队列，然后唤醒某个线程进行处理即可。
+  At first, I didn't notice spontaneous deadlocks in thread pools, and instead of making an open source thread pool, I simply wrapped a thread pool for my own use. The original thread pool encapsulation principle was simple: create **CPU+1** threads to hibernate, add asynchronous tasks to the task queue, and wake up a thread for processing.
   
-  但是，很快我就发现了问题，如果存在一个异步任务 **A** ，发起了异步任务 **B** ， **B** 又发起了 **C**，...，直到第 **N** 个异步任务。这 **N** 个异步任务占满了线程池里的所有线程，这时候第 **N** 个异步任务发起的新任务或者从其他地方发起的新任务都将堵死在任务队列中，等待线程进行处理，而这时已经没有空闲的线程了，都已经阻塞在前 **N** 个异步任务里。  
+  However, I soon found that if there is an asynchronous task **A**, initiates the asynchronous task **B**, initiates the asynchronous task **C**,... , until the **N** asynchronous task. The **N** asynchronous task occupies all threads in the thread pool, and the new tasks initiated by the first **N** asynchronous task or from other places will be blocked in the task queue, waiting for the thread to process, and there are no free threads, all are blocked in the first **N** asynchronous task.  
   
-  这是一种线程池自发性死锁案例，其实，线程池的自发性死锁触发没这么苛刻，只要满足一个要求即可：***当前处理的异步任务发起新的异步任务，而新的异步任务阻塞在任务队列里。***  在并发比较高的情形下，线程池的自发性死锁问题就不能忽视了。
-- ### cpu无法满载运行的问题
+  This is a spontaneous thread pool deadlock case. In fact, the spontaneous thread pool deadlock trigger is not so severe, as long as one requirement is met: *** the current asynchronous task initiates a new asynchronous task, and the new asynchronous task blocks in the task queue. *** In the case of high concurrency, the problem of spontaneous deadlock in the thread pool cannot be ignored.
+- ### CPU cannot run at full load
   
-  在并发比较高的情形下，cpu没有满载运行，这是怎么回事？我们使用线程池的目的，不就是为了充分使用多核的计算能力进行并行计算嘛，现在，高并发下cpu没有满载，那线程池的意义就没那么大了。
+  In the case of high concurrency, the CPU is not running at full load. The purpose of using thread pools is to make full use of multi-core computing power for parallel computation. Now, when the CPU is not full at high concurrency, the meaning of thread pools is not so great.
   
-  问题排查之下，发现还是和线程池的自发性死锁有关，只是线程池还没死锁，但是线程池已经出现了以下情形：**当前处理的异步任务发起新的异步任务，而新的异步任务阻塞在任务队列里。** 相当于直接废掉了一个线程！
+  Problem check，the discovery is still related to the spontaneous deadlock of the thread pool, except that the thread pool is not yet deadlocked, but the thread pool has the following situation：**The currently processed asynchronous task initiates a new asynchronous task, and the new asynchronous task blocks in the task queue.** It's like killing a thread!
   
-  换句话说，假如当前系统有8核，线程池默认开启 **9** 个线程，原则上跑满 **9** 个线程就可以让cpu满载。但是，其中4个异步任务发起了新的异步任务，而新的异步任务阻塞在任务队列，原来的 **4** 个异步任务直接让线程阻塞了，线程被调度到内核阻塞队列等待唤醒。这一段时间，系统内只有 **5** 个线程在进行异步任务处理，cpu只能跑到 **50%** 左右。更关键的是，异步任务既然发起了新的异步任务，那大概率不会只发起一个，反而是多个异步任务扔到任务队列里。结果就是，原来的异步任务就会一直阻塞线程，导致线程池里的线程根本无法跑满，cpu远远达不到 **100%** 。
-- ### 解决线程池的自发性死锁问题以及cpu无法满载运行的问题
+  In other words, if the current system has 8 cores and the thread pool is enabled for **9** threads by default, the CPU can be fully loaded by running **9** threads. However, four of the asynchronous tasks initiated new asynchronous tasks, and the new asynchronous tasks blocked in the task queue. The original **4** asynchronous tasks directly blocked the thread, which was scheduled to the kernel blocking queue waiting to wake up. At this time, there are only **5** threads in the system for asynchronous task processing, and the CPU can only run to **50%**. More importantly, if an asynchronous task initiates a new asynchronous task, there is a high probability that multiple asynchronous tasks will be thrown into the task queue instead of just one. As a result, the original asynchronous task keeps blocking the thread, causing the thread pool to never fill up and the CPU to fall far short of **100%**.
+- ### Resolve spontaneous deadlocks in thread pools and CPU failure to run at full capacity
   
-  怎么解决呢？我们必须保证线程池任一时刻都有 **cpu+1** 个线程在满载运行，而关键在于一旦 **当前处理的异步任务发起了新的异步任务** 就有可能阻塞线程池里的线程。解决的关键就是给线程分状态，分别是 **Ready/Blocking/Running**。
+  So how do we solve this？We must ensure that the thread pool is full at any given time with **CPU+1** threads running, and the key is that currently asynchronous processing can block threads in the pool if **an asynchronous task initiates a new asynchronous task** . The key to the solution is to assign a thread state, which is **Ready/Blocking/Running**.
   
-  状态转换规则如下： **Ready->Running->Blocking->Ready。** 我们保证处于 **Running** 状态的线程永远有 **cpu+1** 个，而一旦 **当前处理的异步任务发起了新的异步任务** ，该线程就由 **Running** 转变为 **Blocking** ，同时唤醒一个阻塞的 **Ready** 线程转变为 **Running** 状态，保证处于 **Running** 状态的线程永远有 **cpu+1** 个。一旦处于 **Blocking** 状态的线程结束异步任务，就将状态转变为 **Ready** 状态进行休眠，等待唤醒转变为 **Running** 状态。
+  State transition rules are as follows: **Ready->Running->Blocking->Ready.** We guarantee that threads in the **Running** state always have **CPUS+1**，As soon as ** an asynchronous task initiates a new asynchronous task**, the thread changes from **Running** to **Blocking** and wakes up a **Ready** thread to **Running**. Ensure that Running threads always have **CPUS+1**. As soon as a **Blocking** thread terminates an asynchronous task, it changes its state to **Ready** for sleep, and waits for awakening to change to **Running**.
   
-  其中还有其他优化措施，比如任务队列使用双端队列，允许由 **异步任务发起的新的异步任务** 进行插队，主要是为了防止添加大量 **Blocking** 异步任务之后线程数量陡增的问题，也是为了促使处于 **Blocking** 状态的线程尽快结束异步任务。
-具体的实现方案请看代码，如果各路大佬发现了新的问题或者有更好的实现方案，请提交 **issue** 进行商讨。
+  There are other optimizations, such as the use of double-ended queues for task queues. This is mainly to prevent the number of **Blocking** threads from increasing when a large number of **Blocking** asynchronous tasks are added, and also to encourage **Blocking** threads to terminate the asynchronous task as soon as possible.
+  
+  Please refer to the code for the specific implementation scheme. If you find a new problem or have a better implementation scheme, please submit **issue** for discussion.

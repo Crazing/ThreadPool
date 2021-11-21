@@ -5,6 +5,15 @@
 int main()
 {
 	{
+		auto asyncTask = [](int param) {
+			std::cout << "This is an async task! param is " << param << std::endl;
+		};
+		int i = 9;
+		auto future = Fate::ThreadPool::run(asyncTask, 9);
+		future.wait();
+
+	}
+	{
 		std::vector<int> num = { 1, 2, 3, 4, 5, 6 };
 		auto mapFunc = [](int& element) {
 			element += 10;
