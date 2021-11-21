@@ -9,7 +9,7 @@ int main()
 			std::cout << "This is an async task! param is " << param << std::endl;
 		};
 		int i = 9;
-		auto future = Fate::ThreadPool::run(asyncTask, 9);
+		auto future = Fate::ThreadPool::run(asyncTask, i);
 		future.wait();
 
 	}
